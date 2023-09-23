@@ -29,7 +29,7 @@ class Vertice {
 
     public Vertice() {
         this.visitado = false;
-        this.listaArestas = new ArrayList<Aresta>(10);
+        this.listaArestas = new ArrayList<>(10);
     }
 
     public boolean isVisitado() {
@@ -77,7 +77,7 @@ class Grafo {
     private List<Vertice> listaVertices;
 
     public Grafo() {
-        this.listaVertices = new ArrayList<Vertice>(10);
+        this.listaVertices = new ArrayList<>(10);
     }
 
     public List<Vertice> getListaVertices() {
@@ -124,39 +124,36 @@ class Grafo {
     public void buscaLargura(String rotuloVerticeInicial) {
         Queue<Vertice> fila = new LinkedList<>();
 
-        this.getListaVertices().forEach(verticeInicial -> {
+        Vertice verticeInicial = this.getListaVertices().stream()
+                .filter(v -> v.getRotulo().equalsIgnoreCase(rotuloVerticeInicial)).toList().get(0);
 
-            if (verticeInicial.getRotulo().equalsIgnoreCase(rotuloVerticeInicial)) {
+        verticeInicial.setVisitado();
+        fila.add(verticeInicial);
 
-                verticeInicial.setVisitado();
-                fila.add(verticeInicial);
+        while (!fila.isEmpty()) {
 
-                while (!fila.isEmpty()) {
+            Vertice v = fila.poll();
 
-                    Vertice v = fila.poll();
+            for (int i = 0; i < v.getListaArestas().size(); i++) {
 
-                    for (int i = 0; i < v.getListaArestas().size(); i++) {
+                Aresta v2 = v.getListaArestas().get(i);
 
-                        Aresta v2 = v.getListaArestas().get(i);
+                for (int j = 0; j < this.getListaVertices().size(); j++) {
 
-                        for (int j = 0; j < this.getListaVertices().size(); j++) {
+                    if (v2.getRotulo().equalsIgnoreCase(this.getListaVertices().get(j).getRotulo())) {
 
-                            if (v2.getRotulo().equalsIgnoreCase(this.getListaVertices().get(j).getRotulo())) {
+                        Vertice v3 = this.getListaVertices().get(j);
 
-                                Vertice v3 = this.getListaVertices().get(j);
-
-                                if (!v3.isVisitado()) {
-                                    fila.add(v3);
-                                    v3.setVisitado();
-                                    System.out.print(v3.getRotulo() + " ");
-                                    break;
-                                }
-                            }
+                        if (!v3.isVisitado()) {
+                            fila.add(v3);
+                            v3.setVisitado();
+                            System.out.print(v3.getRotulo() + " ");
+                            break;
                         }
                     }
                 }
             }
-        });
+        }
     }
 
     public void abreVertices() {
