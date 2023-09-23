@@ -136,11 +136,11 @@ class Grafo {
 
             for (int i = 0; i < v.getListaArestas().size(); i++) {
 
-                Aresta v2 = v.getListaArestas().get(i);
+                Aresta aresta = v.getListaArestas().get(i);
 
                 for (int j = 0; j < this.getListaVertices().size(); j++) {
 
-                    if (v2.getRotulo().equalsIgnoreCase(this.getListaVertices().get(j).getRotulo())) {
+                    if (aresta.getRotulo().equalsIgnoreCase(this.getListaVertices().get(j).getRotulo())) {
 
                         Vertice v3 = this.getListaVertices().get(j);
 
