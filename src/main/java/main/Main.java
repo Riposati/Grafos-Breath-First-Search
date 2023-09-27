@@ -5,70 +5,56 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class Aresta {
-    private String rotulo;
+class Edge {
+    private String name;
 
-    public String getRotulo() {
-        return rotulo;
+    public String getName() {
+        return name;
     }
 
-    public void setRotulo(String rotulo) {
-        this.rotulo = rotulo;
-    }
-
-    @Override
-    public String toString() {
-        return "Aresta [rotulo=" + rotulo + "]";
+    public void setName(String name) {
+        this.name = name;
     }
 }
 
-class Vertice {
-    private String rotulo;
-    private boolean visitado;
-    private final Set<Aresta> adj;
+class Vertex {
+    private String name;
+    private boolean visited;
+    private final Set<Edge> adj;
 
-    public Vertice() {
-        this.visitado = false;
+    public Vertex() {
+        this.visited = false;
         this.adj = new HashSet<>();
     }
 
-    public boolean isVisitado() {
-        return this.visitado;
+    public boolean isVisited() {
+        return this.visited;
     }
 
-    public String getRotulo() {
-        return rotulo;
+    public String getName() {
+        return name;
     }
 
-    public void setRotulo(String rotulo) {
-        this.rotulo = rotulo;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Set<Aresta> getAdj() {
+    public Set<Edge> getAdj() {
         return adj;
     }
 
-    public void addAresta(String rotulo) {
-        Aresta a = new Aresta();
-        a.setRotulo(rotulo);
+    public void addEdge(String name) {
+        Edge a = new Edge();
+        a.setName(name);
         this.adj.add(a);
     }
 
-    public void setVisitado() {
-        this.visitado = true;
+    public void setVisited() {
+        this.visited = true;
     }
 
-    public void setNaoVisitado() {
-        this.visitado = false;
-    }
-
-    @Override
-    public String toString() {
-        return "Vertice{" +
-                "rotulo='" + rotulo + '\'' +
-                ", visitado=" + visitado +
-                ", listaArestas=" + adj +
-                '}';
+    public void setNotVisited() {
+        this.visited = false;
     }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
@@ -76,7 +62,6 @@ class Vertice {
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }
-
 
 class Pair {
     private final String verticeLabel;
@@ -94,49 +79,40 @@ class Pair {
     public int getLevel() {
         return level;
     }
-
-    @Override
-    public String toString() {
-        return "Pair{" +
-                "verticeLabel='" + verticeLabel + '\'' +
-                ", level=" + level +
-                '}';
-    }
 }
 
+class Graph {
+    private List<Vertex> vertexList;
 
-class Grafo {
-    private List<Vertice> listaVertices;
-
-    public Grafo() {
-        this.listaVertices = new ArrayList<>(10);
+    public Graph() {
+        this.vertexList = new ArrayList<>(10);
     }
 
-    public List<Vertice> getListaVertices() {
-        return listaVertices;
+    public List<Vertex> getVertexList() {
+        return vertexList;
     }
 
-    public void addVertice(String rotuloVertice) {
-        Vertice v = new Vertice();
-        v.setRotulo(rotuloVertice);
-        this.listaVertices.add(v);
+    public void addVertex(String vertexName) {
+        Vertex v = new Vertex();
+        v.setName(vertexName);
+        this.vertexList.add(v);
     }
 
-    public void addAresta(Grafo g, String verticeRecebeAresta, String verticeParteAresta) {
-        g.getListaVertices().forEach(v -> {
-            if (v.getRotulo().equalsIgnoreCase(verticeParteAresta))
-                v.addAresta(verticeRecebeAresta);
-            if (v.getRotulo().equalsIgnoreCase(verticeRecebeAresta))
-                v.addAresta(verticeParteAresta);
+    public void addEdge(Graph g, String verticeRecebeAresta, String verticeParteAresta) {
+        g.getVertexList().forEach(v -> {
+            if (v.getName().equalsIgnoreCase(verticeParteAresta))
+                v.addEdge(verticeRecebeAresta);
+            if (v.getName().equalsIgnoreCase(verticeRecebeAresta))
+                v.addEdge(verticeParteAresta);
         });
     }
 
-    public void setListaVertices(List<Vertice> verticeList) {
-        this.listaVertices = verticeList;
+    public void setVertexList(List<Vertex> verticeList) {
+        this.vertexList = verticeList;
     }
 
 
-    public int buscaLargura(String rotuloVerticeInicial, String rotuloVerticeFinal) {
+    public int breathFirstSearch(String rotuloVerticeInicial, String rotuloVerticeFinal) {
         Queue<Pair> q = new LinkedList<>();
         int distance;
 
@@ -150,48 +126,40 @@ class Grafo {
             if (queueFront.equalsIgnoreCase(rotuloVerticeFinal))
                 return distance;
 
-            Vertice vertex = this.getListaVertices().stream()
-                    .filter(v2 -> v2.getRotulo().equalsIgnoreCase(queueFront)).toList().get(0);
+            Vertex vertex = this.getVertexList().stream()
+                    .filter(v2 -> v2.getName().equalsIgnoreCase(queueFront)).toList().get(0);
 
             analyseEdgesAndVertexList(q, distance, vertex);
         }
         return 0;
     }
 
-    private void analyseEdgesAndVertexList(Queue<Pair> q, int distance, Vertice vertex) {
-        vertex.getAdj().forEach(aresta ->
+    private void analyseEdgesAndVertexList(Queue<Pair> q, int distance, Vertex vertex) {
+        vertex.getAdj().forEach(edge ->
 
-                this.getListaVertices().forEach(vertice -> {
+            this.getVertexList().forEach(v -> {
 
-                    if (aresta.getRotulo().equalsIgnoreCase(vertice.getRotulo()) && !vertice.isVisitado()) {
-                        q.add(new Pair(vertice.getRotulo(), distance + 1));
-                        vertice.setVisitado();
-                    }
-                })
+                if (edge.getName().equalsIgnoreCase(v.getName()) && !v.isVisited()) {
+                    q.add(new Pair(v.getName(), distance + 1));
+                    v.setVisited();
+                }
+            })
         );
     }
 
     public void abreVertices() {
-        this.getListaVertices().forEach(Vertice::setNaoVisitado);
-    }
-
-    @Override
-    public String toString() {
-        return "Grafo{" +
-                "listaVertices=" + listaVertices +
-                '}';
+        this.getVertexList().forEach(Vertex::setNotVisited);
     }
 }
 
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        Grafo graph = new Grafo();
+        Graph graph = new Graph();
         int edges;
         int tot;
 
         String aux = sc.nextLine();
-
         edges = Integer.parseInt(aux.split(" ")[1]);
 
         for (int i = 0; i < edges; ++i) {
@@ -200,19 +168,19 @@ public class Main {
             String labelVertexOne = aux.split(" ")[0];
             String labelVertexTwo = aux.split(" ")[1];
 
-            graph.addVertice(labelVertexOne);
-            graph.addVertice(labelVertexTwo);
+            graph.addVertex(labelVertexOne);
+            graph.addVertex(labelVertexTwo);
 
-            graph.addAresta(graph, labelVertexOne, labelVertexTwo);
+            graph.addEdge(graph, labelVertexOne, labelVertexTwo);
         }
 
-        graph.setListaVertices(graph.getListaVertices().stream()
-                .filter(Vertice.distinctByKey(Vertice::getRotulo))
-                .sorted(Comparator.comparing(Vertice::getRotulo)).toList());
+        graph.setVertexList(graph.getVertexList().stream()
+                .filter(Vertex.distinctByKey(Vertex::getName))
+                .sorted(Comparator.comparing(Vertex::getName)).toList());
 
-        tot = graph.buscaLargura("Entrada", "*");
+        tot = graph.breathFirstSearch("Entrada", "*");
         graph.abreVertices();
-        tot += graph.buscaLargura("*", "Saida");
+        tot += graph.breathFirstSearch("*", "Saida");
         System.out.println(tot);
     }
 }
